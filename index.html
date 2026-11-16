@@ -1,1 +1,497 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>IPL Auction Room</title>
+<style>
+:root{--bg:#0a0e16;--c1:#111826;--c2:#18202f;--ln:#243049;--tx:#e6ebf5;--mt:#8b97b1;--ac:#9fb4ff;--gn:#6ee7b7;--am:#fcd34d;--rs:#fda4af}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-tap-highlight-color:transparent;padding-bottom:84px}
+.w{max-width:600px;margin:auto;padding:12px}
+.top{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(10,14,22,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--ln)}
+.code{font-family:ui-monospace,monospace;letter-spacing:3px;background:var(--c2);border:1px solid var(--ln);padding:3px 9px;border-radius:8px;color:var(--ac);margin-left:8px}
+.card{background:var(--c1);border:1px solid var(--ln);border-radius:16px;padding:14px;margin:10px 0}
+.row{display:flex;gap:8px;align-items:center}.sp{justify-content:space-between}.wrap{flex-wrap:wrap}
+.mt{color:var(--mt)}.ctr{text-align:center}
+h1{font-size:30px;letter-spacing:-.5px}h2{font-size:18px;margin-bottom:6px}
+.hero{padding:28px 4px 8px}
+label{display:block;color:var(--mt);font-size:12px;text-transform:uppercase;letter-spacing:1px;margin:6px 0}
+input,select{width:100%;background:var(--c2);border:1px solid var(--ln);color:var(--tx);padding:12px;border-radius:12px;font-size:16px;margin-bottom:10px}
+.b{border:1px solid var(--ln);background:var(--c2);color:var(--tx);padding:11px 14px;border-radius:12px;font-weight:600;font-size:14px;cursor:pointer;width:100%;margin-top:6px}
+.b.p{background:linear-gradient(135deg,#9fb4ff,#b79cff);color:#0a0e16;border:0}
+.b.g{background:linear-gradient(135deg,#6ee7b7,#9fb4ff);color:#06201a;border:0}
+.b.d{background:#3a1c26;color:var(--rs);border-color:#5b2a39}
+.b:disabled{opacity:.4}.b.s{width:auto;margin:0;padding:8px 12px}
+.ic{background:var(--c2);border:1px solid var(--ln);border-radius:10px;padding:6px 10px;color:var(--tx)}
+.chip{display:inline-block;background:var(--c2);border:1px solid var(--ln);border-radius:20px;padding:2px 10px;font-size:12px;color:var(--mt)}
+.chip.os{color:var(--am);border-color:#5a4a1a}
+.pill{background:#3b2f12;color:var(--am);border-radius:20px;padding:3px 10px;font-size:12px;margin-right:6px}
+.pn{font-size:30px;font-weight:800;letter-spacing:-.5px;margin:10px 0 2px}
+.prof{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.prof div{background:var(--c2);border-radius:12px;padding:10px}.prof i{display:block;font-style:normal;font-size:11px;color:var(--mt);text-transform:uppercase;letter-spacing:.8px}.prof b{font-size:16px}
+.big{font-size:40px;font-weight:800;letter-spacing:-1px}
+.bar{height:6px;background:var(--c2);border-radius:6px;overflow:hidden;margin:10px 0}.bar>div{height:100%;background:linear-gradient(90deg,#6ee7b7,#9fb4ff);width:100%}
+.tm{font-size:34px;font-weight:800;font-variant-numeric:tabular-nums}
+.sold{background:linear-gradient(135deg,#12261f,#111826);border-color:#1f5a46;text-align:center}.sold .big{color:var(--gn)}
+.uns{text-align:center}.uns .big{color:var(--rs)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tc{background:var(--c2);border:1px solid var(--ln);border-radius:12px;padding:10px;text-align:left;color:var(--tx);cursor:pointer}
+.tc.mine{outline:2px solid var(--ac)}.tc small{color:var(--mt);display:block}
+.nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:rgba(10,14,22,.96);border-top:1px solid var(--ln);padding-bottom:env(safe-area-inset-bottom)}
+.nav button{flex:1;background:none;border:0;color:var(--mt);padding:14px 4px;font-weight:600}.nav button.on{color:var(--ac)}
+.li{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--ln)}.li:last-child{border:0}
+.stp{display:flex;align-items:center;justify-content:space-between;padding:6px 0}.stp div{display:flex;gap:10px;align-items:center}.stp b{min-width:70px;text-align:center}
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:#232d44;padding:10px 16px;border-radius:12px;z-index:9}
+dialog{background:var(--c1);color:var(--tx);border:1px solid var(--ln);border-radius:16px;width:min(560px,92vw)}
+textarea{width:100%;height:220px;background:var(--c2);color:var(--tx);border:1px solid var(--ln);border-radius:12px;padding:10px;font-size:13px}
+</style></head><body>
+<div id="app"></div>
+<dialog id="imp"><h2>Import players</h2><p class="mt" style="font-size:13px;margin-bottom:8px">One per line: Name|CC|R|Rating|PrevTeam<br>CC: IN AU EN SA NZ WI AF SL BD ZW IR NL NE · R: B W A L · PrevTeam optional (CSK MI RCB KKR SRH DC PBKS RR GT LSG)</p><textarea id="ta"></textarea><div class="row"><button class="b p" onclick="doImp()">Apply</button><button class="b" onclick="resetImp()">Default list</button><button class="b" onclick="$('#imp').close()">Close</button></div></dialog>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+/* ---------- DATA ---------- */
+const TEAMS={CSK:['Chennai Super Kings','#fcd34d'],MI:['Mumbai Indians','#7cb4ff'],RCB:['Royal Challengers','#fda4af'],KKR:['Kolkata Knight Riders','#c4b5fd'],SRH:['Sunrisers Hyderabad','#fdba74'],DC:['Delhi Capitals','#93c5fd'],PBKS:['Punjab Kings','#fca5a5'],RR:['Rajasthan Royals','#f9a8d4'],GT:['Gujarat Titans','#a5b4c8'],LSG:['Lucknow Super Giants','#5eead4']};
+const ROLE={B:'Batter',W:'Wicketkeeper',A:'All-rounder',L:'Bowler'};
+const CTRY={IN:'India',AU:'Australia',EN:'England',SA:'South Africa',NZ:'New Zealand',WI:'West Indies',AF:'Afghanistan',SL:'Sri Lanka',BD:'Bangladesh',ZW:'Zimbabwe',IR:'Ireland',NL:'Netherlands',NE:'Nepal'};
+const RAW=`Virat Kohli|IN|B|96|RCB
+Rohit Sharma|IN|B|92|MI
+Shubman Gill|IN|B|93|GT
+Yashasvi Jaiswal|IN|B|92|RR
+Suryakumar Yadav|IN|B|92|MI
+KL Rahul|IN|W|90|DC
+Rishabh Pant|IN|W|91|LSG
+Sanju Samson|IN|W|90|RR
+Ishan Kishan|IN|W|84|SRH
+Ruturaj Gaikwad|IN|B|88|CSK
+Shreyas Iyer|IN|B|88|PBKS
+Tilak Varma|IN|B|87|MI
+Abhishek Sharma|IN|B|88|SRH
+Rinku Singh|IN|B|82|KKR
+Rajat Patidar|IN|B|82|RCB
+Sai Sudharsan|IN|B|84|GT
+Ajinkya Rahane|IN|B|68|KKR
+Devdutt Padikkal|IN|B|72|RCB
+Prithvi Shaw|IN|B|56|
+Mayank Agarwal|IN|B|58|
+Rahul Tripathi|IN|B|58|
+Manish Pandey|IN|B|54|
+Sarfaraz Khan|IN|B|66|
+Karun Nair|IN|B|66|DC
+Dhruv Jurel|IN|W|78|RR
+Jitesh Sharma|IN|W|76|RCB
+KS Bharat|IN|W|56|
+Shivam Dube|IN|A|80|CSK
+Washington Sundar|IN|A|78|GT
+Axar Patel|IN|A|86|DC
+Ravindra Jadeja|IN|A|88|CSK
+Hardik Pandya|IN|A|91|MI
+Venkatesh Iyer|IN|A|78|KKR
+Nitish Kumar Reddy|IN|A|80|SRH
+Riyan Parag|IN|A|82|RR
+Shardul Thakur|IN|A|72|LSG
+Krunal Pandya|IN|A|76|RCB
+Deepak Hooda|IN|A|60|
+Rahul Tewatia|IN|A|70|GT
+Vijay Shankar|IN|A|56|
+Jayant Yadav|IN|A|48|
+Kuldeep Yadav|IN|L|88|DC
+Yuzvendra Chahal|IN|L|82|PBKS
+Jasprit Bumrah|IN|L|97|MI
+Mohammed Siraj|IN|L|88|GT
+Mohammed Shami|IN|L|85|SRH
+Arshdeep Singh|IN|L|90|PBKS
+Varun Chakravarthy|IN|L|88|KKR
+Ravi Bishnoi|IN|L|78|LSG
+Harshit Rana|IN|L|78|KKR
+Prasidh Krishna|IN|L|80|GT
+Avesh Khan|IN|L|74|LSG
+Deepak Chahar|IN|L|76|MI
+Bhuvneshwar Kumar|IN|L|82|RCB
+Harshal Patel|IN|L|74|SRH
+T Natarajan|IN|L|74|DC
+Mukesh Kumar|IN|L|68|DC
+Khaleel Ahmed|IN|L|72|CSK
+Umesh Yadav|IN|L|54|
+Mohit Sharma|IN|L|62|DC
+Yash Dayal|IN|L|70|RCB
+Mayank Yadav|IN|L|74|LSG
+Umran Malik|IN|L|58|
+Navdeep Saini|IN|L|56|
+Shivam Mavi|IN|L|54|
+Chetan Sakariya|IN|L|48|
+Kuldeep Sen|IN|L|50|
+Jaydev Unadkat|IN|L|58|
+Rahul Chahar|IN|L|60|
+Sandeep Sharma|IN|L|62|RR
+Akash Deep|IN|L|74|LSG
+Anshul Kamboj|IN|L|64|CSK
+Sai Kishore|IN|L|68|GT
+Ishant Sharma|IN|L|60|GT
+Pat Cummins|AU|L|90|SRH
+Mitchell Starc|AU|L|88|DC
+Josh Hazlewood|AU|L|86|RCB
+Travis Head|AU|B|90|SRH
+David Warner|AU|B|72|
+Steve Smith|AU|B|70|
+Glenn Maxwell|AU|A|84|PBKS
+Marcus Stoinis|AU|A|82|PBKS
+Mitchell Marsh|AU|A|84|LSG
+Cameron Green|AU|A|84|
+Tim David|AU|B|82|RCB
+Jake Fraser-McGurk|AU|B|74|DC
+Josh Inglis|AU|W|80|PBKS
+Alex Carey|AU|W|64|
+Matthew Wade|AU|W|56|
+Adam Zampa|AU|L|80|
+Nathan Ellis|AU|L|76|PBKS
+Xavier Bartlett|AU|L|66|PBKS
+Spencer Johnson|AU|L|66|
+Jason Behrendorff|AU|L|62|
+Sean Abbott|AU|A|60|
+Ben Dwarshuis|AU|L|50|
+Aaron Hardie|AU|A|56|PBKS
+Mitchell Owen|AU|A|66|PBKS
+Matthew Short|AU|A|66|
+Josh Philippe|AU|W|50|
+Cooper Connolly|AU|A|60|PBKS
+Jhye Richardson|AU|L|58|
+Lance Morris|AU|L|54|
+Tanveer Sangha|AU|L|50|
+Daniel Sams|AU|A|52|
+Nathan Coulter-Nile|AU|L|54|
+Ashton Agar|AU|A|50|
+Marnus Labuschagne|AU|B|54|
+Jos Buttler|EN|W|90|GT
+Phil Salt|EN|W|86|RCB
+Jofra Archer|EN|L|86|RR
+Liam Livingstone|EN|A|80|RCB
+Sam Curran|EN|A|80|CSK
+Jonny Bairstow|EN|W|72|
+Harry Brook|EN|B|82|DC
+Ben Stokes|EN|A|80|
+Moeen Ali|EN|A|68|KKR
+Jacob Bethell|EN|A|76|RCB
+Will Jacks|EN|A|80|MI
+Adil Rashid|EN|L|72|
+Mark Wood|EN|L|72|LSG
+Reece Topley|EN|L|58|
+Tom Curran|EN|A|58|
+Chris Woakes|EN|A|62|
+Jamie Overton|EN|A|62|CSK
+Brydon Carse|EN|L|62|SRH
+Joe Root|EN|B|72|
+Ben Duckett|EN|B|64|
+Jamie Smith|EN|W|62|
+Tom Banton|EN|W|54|
+Dawid Malan|EN|B|58|
+Sam Billings|EN|W|54|
+Liam Dawson|EN|A|50|
+Gus Atkinson|EN|L|60|
+Luke Wood|EN|L|50|
+Rehan Ahmed|EN|L|50|
+Jason Roy|EN|B|58|
+Tymal Mills|EN|L|50|
+Chris Jordan|EN|L|50|
+Josh Tongue|EN|L|50|
+Kagiso Rabada|SA|L|88|GT
+Heinrich Klaasen|SA|W|90|SRH
+Quinton de Kock|SA|W|80|KKR
+Aiden Markram|SA|B|80|LSG
+David Miller|SA|B|80|LSG
+Marco Jansen|SA|A|82|PBKS
+Tristan Stubbs|SA|W|82|DC
+Dewald Brevis|SA|B|74|CSK
+Anrich Nortje|SA|L|74|KKR
+Lungi Ngidi|SA|L|74|RCB
+Gerald Coetzee|SA|L|66|
+Keshav Maharaj|SA|L|56|
+Tabraiz Shamsi|SA|L|54|
+Ryan Rickelton|SA|W|78|MI
+Corbin Bosch|SA|A|64|MI
+Rassie van der Dussen|SA|B|64|
+Reeza Hendricks|SA|B|60|
+Wiaan Mulder|SA|A|60|
+Donovan Ferreira|SA|W|54|
+Nandre Burger|SA|L|58|RR
+Kwena Maphaka|SA|L|66|RR
+Lizaad Williams|SA|L|50|
+Faf du Plessis|SA|B|70|DC
+George Linde|SA|A|48|
+Ottniel Baartman|SA|L|48|
+Lhuan-dre Pretorius|SA|W|60|RR
+Tony de Zorzi|SA|B|58|
+Matthew Breetzke|SA|B|58|
+Kane Williamson|NZ|B|76|GT
+Trent Boult|NZ|L|84|MI
+Devon Conway|NZ|B|76|CSK
+Rachin Ravindra|NZ|A|80|CSK
+Daryl Mitchell|NZ|A|78|
+Glenn Phillips|NZ|A|80|GT
+Mitchell Santner|NZ|A|74|MI
+Lockie Ferguson|NZ|L|78|PBKS
+Matt Henry|NZ|L|72|
+Tim Southee|NZ|L|56|
+Finn Allen|NZ|W|70|
+Tim Seifert|NZ|W|60|
+Mark Chapman|NZ|B|56|
+Jacob Duffy|NZ|L|62|
+Kyle Jamieson|NZ|L|66|PBKS
+Adam Milne|NZ|L|56|
+Michael Bracewell|NZ|A|60|
+Will O'Rourke|NZ|L|66|
+Ish Sodhi|NZ|L|50|
+Jimmy Neesham|NZ|A|64|
+Nicholas Pooran|WI|W|88|LSG
+Andre Russell|WI|A|84|KKR
+Sunil Narine|WI|A|88|KKR
+Shimron Hetmyer|WI|B|78|RR
+Rovman Powell|WI|B|72|KKR
+Jason Holder|WI|A|64|
+Romario Shepherd|WI|A|74|RCB
+Alzarri Joseph|WI|L|64|
+Akeal Hosein|WI|L|64|
+Shai Hope|WI|W|64|
+Sherfane Rutherford|WI|B|72|GT
+Evin Lewis|WI|B|58|
+Brandon King|WI|B|54|
+Keemo Paul|WI|A|50|
+Obed McCoy|WI|L|52|
+Shamar Joseph|WI|L|60|
+Oshane Thomas|WI|L|44|
+Odean Smith|WI|A|44|
+Fabian Allen|WI|A|50|
+Johnson Charles|WI|W|50|
+Kyle Mayers|WI|A|60|
+Roston Chase|WI|A|56|
+Gudakesh Motie|WI|L|54|
+Jayden Seales|WI|L|50|
+Rashid Khan|AF|L|94|GT
+Mohammad Nabi|AF|A|64|MI
+Rahmanullah Gurbaz|AF|W|76|KKR
+Noor Ahmad|AF|L|78|CSK
+Fazalhaq Farooqi|AF|L|66|
+Mujeeb Ur Rahman|AF|L|64|
+Azmatullah Omarzai|AF|A|72|PBKS
+Naveen-ul-Haq|AF|L|62|
+Ibrahim Zadran|AF|B|62|
+Allah Ghazanfar|AF|L|68|MI
+Gulbadin Naib|AF|A|50|
+Najibullah Zadran|AF|B|48|
+Wanindu Hasaranga|SL|A|78|RR
+Maheesh Theekshana|SL|L|74|RR
+Matheesha Pathirana|SL|L|82|CSK
+Pathum Nissanka|SL|B|74|
+Kusal Mendis|SL|W|66|
+Dushmantha Chameera|SL|L|60|
+Dasun Shanaka|SL|A|56|
+Kusal Perera|SL|W|54|
+Charith Asalanka|SL|B|58|
+Angelo Mathews|SL|A|48|
+Nuwan Thushara|SL|L|56|
+Dilshan Madushanka|SL|L|54|
+Kamindu Mendis|SL|A|64|
+Dunith Wellalage|SL|A|50|
+Mustafizur Rahman|BD|L|74|DC
+Shakib Al Hasan|BD|A|64|
+Litton Das|BD|W|60|
+Taskin Ahmed|BD|L|52|
+Mehidy Hasan Miraz|BD|A|50|
+Shoriful Islam|BD|L|46|
+Mushfiqur Rahim|BD|W|48|
+Sikandar Raza|ZW|A|70|PBKS
+Blessing Muzarabani|ZW|L|54|
+Paul Stirling|IR|B|44|
+Josh Little|IR|L|60|GT
+Harry Tector|IR|B|44|
+Bas de Leede|NL|A|48|
+Roelof van der Merwe|NL|A|44|
+Sandeep Lamichhane|NE|L|50|`;
+function parse(t){return t.trim().split('\n').map(l=>l.split('|')).filter(a=>a.length>=4&&a[0].trim()).map((a,i)=>{const rt=+a[3]||50;return{id:i,n:a[0].trim(),c:a[1].trim().toUpperCase(),r:a[2].trim().toUpperCase(),rt,p:(a[4]||'').trim().toUpperCase(),b:rt>=90?200:rt>=80?150:rt>=70?100:rt>=60?75:rt>=50?50:30}})}
 
+/* ---------- HELPERS ---------- */
+const $=s=>document.querySelector(s);
+const rnd=n=>Array.from({length:n},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.random()*32|0]).join('');
+const fmt=l=>l>=100?(+(l/100).toFixed(2))+' Cr':l+' L';
+const spk=l=>l>=100?(+(l/100).toFixed(2))+' crore':l+' lakh';
+const inc=b=>b<100?5:b<200?10:b<500?20:25;
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const LIM={purse:[2000,30000],rtm:[0,5],maxSq:[11,30],maxOs:[0,12],timer:[5,120]};
+const tn=t=>t?TEAMS[t][0]:'—', tcol=t=>t?TEAMS[t][1]:'#fff';
+let cid=localStorage.cid||(localStorage.cid=rnd(12)),myName=localStorage.nm||'',code='',isHost=false,inRoom=false;
+let S=null,V=null,PL=[],peer=null,conns={},hc=null,off=0,tab='a',muted=false,downSince=0,lastMsg=0,raise=0,vt=null,lastC=null,dialing=0,wl=null;
+const hashCode=(location.hash||'').slice(1).toUpperCase().slice(0,5);
+const now=()=>Date.now()+off;
+function toast(m){const d=document.createElement('div');d.className='toast';d.textContent=m;document.body.appendChild(d);setTimeout(()=>d.remove(),2200)}
+
+/* ---------- AUDIO ---------- */
+let ac;function unlock(){try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume()}catch(e){}}
+document.addEventListener('click',unlock);document.addEventListener('touchstart',unlock,{passive:true});
+function tone(f,t,d,ty='sine',v=.18){if(!ac||muted)return;const o=ac.createOscillator(),g=ac.createGain();o.type=ty;o.frequency.value=f;const s=ac.currentTime+t;g.gain.setValueAtTime(0,s);g.gain.linearRampToValueAtTime(v,s+.02);g.gain.exponentialRampToValueAtTime(.001,s+d);o.connect(g).connect(ac.destination);o.start(s);o.stop(s+d+.05)}
+function noise(t,d,v=.3){if(!ac||muted)return;const b=ac.createBuffer(1,ac.sampleRate*d,ac.sampleRate),x=b.getChannelData(0);for(let i=0;i<x.length;i++)x[i]=(Math.random()*2-1)*(1-i/x.length);const s=ac.createBufferSource(),g=ac.createGain();g.gain.value=v;s.buffer=b;s.connect(g).connect(ac.destination);s.start(ac.currentTime+t)}
+const SND={ann(){[523,659,784,1047].forEach((f,i)=>tone(f,i*.12,.4,'triangle'))},bid(){tone(880,0,.12,'sine',.12)},tick(){tone(1200,0,.05,'square',.05)},
+sold(){noise(0,.15,.5);tone(110,0,.3,'sine',.5);[523,659,784,1047,1319].forEach((f,i)=>tone(f,.25+i*.1,.5,'triangle'))},uns(){[400,330,260].forEach((f,i)=>tone(f,i*.18,.35,'sawtooth',.08))},rtm(){[700,900,700,900].forEach((f,i)=>tone(f,i*.12,.15,'square',.07))}};
+function say(t){if(muted||!window.speechSynthesis)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);const v=speechSynthesis.getVoices().find(v=>/en-IN/i.test(v.lang))||null;if(v)u.voice=v;u.lang='en-IN';u.rate=.98;speechSynthesis.speak(u)}catch(e){}}
+function mute(){muted=!muted;if(muted)try{speechSynthesis.cancel()}catch(e){}ui()}
+function snd(){const c=V&&V.cur;const k=c?{pid:c.pid,st:c.st,bid:c.bid}:null,o=lastC;lastC=k;if(!k||muted)return;const P=PL[c.pid];if(!P)return;
+ if(!o||o.pid!==k.pid){if(c.st==='intro'){SND.ann();say(`Next up. ${P.n}. ${ROLE[P.r]}${P.c!=='IN'?' from '+CTRY[P.c]:''}. Base price ${spk(P.b)}.`)}return}
+ if(o.st!==k.st){if(k.st==='sold'){SND.sold();say(`Sold! ${P.n} to ${tn(c.to)} for ${spk(c.price)}.`)}else if(k.st==='unsold'){SND.uns();say(`${P.n} goes unsold.`)}else if(k.st==='rtm1'){SND.rtm();say(`Right to match! ${tn(c.rtmT)}, do you want to use your R T M?`)}else if(k.st==='rtm2'){say(`${tn(c.rtmT)} uses R T M.`)}else if(k.st==='rtm3'){SND.rtm();say(`${tn(c.bidder)} raises to ${spk(c.raise)}.`)}}
+ else if(k.bid!==o.bid&&k.st==='bid')SND.bid()}
+
+/* ---------- HOST ---------- */
+function newState(){return{code,phase:'lobby',set:{purse:12000,timer:20,rtm:2,maxSq:25,maxOs:8},teams:Object.fromEntries(Object.keys(TEAMS).map(k=>[k,{own:null,oname:'',purse:12000,rtm:2,n:0,os:0,sq:[]}])),pools:[],pi:0,qi:0,unsold:[],reran:false,cur:null,paused:false,log:[],members:{}}}
+function hostStart(resume){isHost=true;inRoom=true;
+ if(resume){S=JSON.parse(localStorage.hs);PL=JSON.parse(localStorage.hp);code=S.code}
+ else{code=rnd(5);PL=parse(localStorage.csv||RAW);S=newState()}
+ openHostPeer(resume);ui()}
+function openHostPeer(resumed){try{peer&&peer.destroy()}catch(e){}
+ peer=new Peer('iplauc-'+code);
+ peer.on('open',()=>{S.members[cid]=S.members[cid]||{name:myName,team:null};S.members[cid].name=myName;location.hash=code;wake();push()});
+ peer.on('connection',c=>{c.on('data',m=>onMsg(c,m));c.on('error',()=>{})});
+ peer.on('disconnected',()=>{try{peer.reconnect()}catch(e){}});
+ peer.on('error',e=>{if(e.type==='unavailable-id'){if(!resumed&&S.phase==='lobby'&&!Object.keys(conns).length){code=rnd(5);S.code=code;openHostPeer(false)}else setTimeout(()=>openHostPeer(resumed),3000)}else setTimeout(()=>{try{peer.disconnected&&peer.reconnect()}catch(e){}},2000)})}
+function wake(){try{navigator.wakeLock&&navigator.wakeLock.request('screen').then(w=>wl=w).catch(()=>{})}catch(e){}}
+function onMsg(c,m){if(m.t==='join'){conns[m.cid]=c;c.cid=m.cid;const mem=S.members[m.cid]||(S.members[m.cid]={name:m.name,team:null});mem.name=m.name;c.send({t:'init',players:PL});push();return}
+ if(!c.cid)return;if(m.t==='ping'){c.send({t:'pong'});return}act(c.cid,m)}
+function view(k){const h=k===cid,mem=S.members[k]||{},c=S.cur;
+ const left=S.pools.reduce((a,p,i)=>a+(i<S.pi?0:i===S.pi?p.ids.length-S.qi:p.ids.length),0)+(S.reran?0:S.unsold.length);
+ const v={code:S.code,phase:S.phase,set:S.set,cur:c,paused:S.paused,log:S.log.slice(0,40),my:mem.team,left,pn:(S.pools[S.pi]||{}).name||'',
+  mem:Object.values(S.members).map(m=>({n:m.name,t:m.team})),teams:{}};
+ for(const T in S.teams){const t=S.teams[T];v.teams[T]={oname:t.oname,on:!!t.own&&(t.own===cid||!!(conns[t.own]&&conns[t.own].open)),taken:!!t.own,purse:t.purse,rtm:t.rtm,n:t.n,os:t.os,sq:(h||mem.team===T)?t.sq:null}}
+ if(h){v.pools=S.pools;v.pi=S.pi;v.qi=S.qi;v.unsold=S.unsold}return v}
+function push(){if(!S)return;try{localStorage.hs=JSON.stringify(S);localStorage.hp=JSON.stringify(PL)}catch(e){}
+ for(const k in conns){const c=conns[k];if(c&&c.open)try{c.send({t:'s',now:Date.now(),s:view(k)})}catch(e){}}ui()}
+function bcastInit(){for(const k in conns){const c=conns[k];if(c&&c.open)try{c.send({t:'init',players:PL})}catch(e){}}}
+function canBuy(T,pr,pid){const t=S.teams[T];return t&&t.purse>=pr&&t.n<S.set.maxSq&&(PL[pid].c==='IN'||t.os<S.set.maxOs)}
+const sh=a=>{for(let i=a.length;i>1;i--){const j=Math.random()*i|0;[a[i-1],a[j]]=[a[j],a[i-1]]}return a};
+function startAuc(){const ids=PL.map(p=>p.id);const top=[...ids].sort((a,b)=>PL[b].rt-PL[a].rt).slice(0,Math.min(24,ids.length));const rest=ids.filter(i=>!top.includes(i));
+ const nm={B:'Batters',W:'Wicketkeepers',A:'All-rounders',L:'Bowlers'};
+ S.pools=[{name:'Marquee Set',ids:sh(top)},...['B','W','A','L'].map(r=>({name:nm[r],ids:sh(rest.filter(i=>PL[i].r===r))}))].filter(p=>p.ids.length);
+ for(const T in S.teams){S.teams[T].purse=S.set.purse;S.teams[T].rtm=S.set.rtm}
+ S.phase='auction';S.pi=0;S.qi=0;nxt()}
+function nxt(){while(S.pi<S.pools.length){const p=S.pools[S.pi];if(S.qi<p.ids.length){const id=p.ids[S.qi++];S.cur={pid:id,bid:0,bidder:null,st:'intro',endsAt:Date.now()+4500};return}S.pi++;S.qi=0}
+ if(!S.reran&&S.unsold.length){S.reran=true;S.pools.push({name:'Unsold Re-run',ids:sh(S.unsold)});S.unsold=[];return nxt()}
+ S.phase='ended';S.cur=null}
+function unsold(){const c=S.cur;c.st='unsold';c.next=Date.now()+3500;if(!S.reran)S.unsold.push(c.pid)}
+function sell(T,pr,via){const c=S.cur,t=S.teams[T],p=PL[c.pid];t.purse-=pr;t.sq.push({id:c.pid,pr});t.n++;if(p.c!=='IN')t.os++;if(via==='RTM')t.rtm--;
+ c.st='sold';c.to=T;c.price=pr;c.via=via||'';c.next=Date.now()+5500;S.log.unshift({id:c.pid,to:T,pr,via:c.via})}
+function close(){const c=S.cur;if(!c.bidder){unsold();return}const T=PL[c.pid].p;
+ if(T&&T!==c.bidder&&S.teams[T]&&S.teams[T].own&&S.teams[T].rtm>0&&canBuy(T,c.bid,c.pid)){c.st='rtm1';c.rtmT=T;c.endsAt=Date.now()+20000;return}
+ sell(c.bidder,c.bid)}
+const ACTIVE=['intro','bid','rtm1','rtm2','rtm3'];
+function act(k,m){const c=S.cur,mem=S.members[k];if(!mem)return;const H=k===cid,T=mem.team,t=Date.now();
+ switch(m.t){
+ case'claim':if(S.teams[m.team]&&!S.teams[m.team].own){if(T){S.teams[T].own=null;S.teams[T].oname=''}S.teams[m.team].own=k;S.teams[m.team].oname=mem.name;mem.team=m.team}break;
+ case'free':if(T&&S.phase==='lobby'){S.teams[T].own=null;S.teams[T].oname='';mem.team=null}break;
+ case'bid':{if(!c||c.st!=='bid'||S.paused||!T||c.bidder===T)break;const amt=c.bidder?c.bid+inc(c.bid):PL[c.pid].b;if(!canBuy(T,amt,c.pid))break;c.bid=amt;c.bidder=T;c.endsAt=t+S.set.timer*1000;break}
+ case'rtmuse':if(c&&c.st==='rtm1'&&T===c.rtmT){c.st='rtm2';c.endsAt=t+25000}break;
+ case'rtmpass':if(c&&c.st==='rtm1'&&T===c.rtmT)sell(c.bidder,c.bid);break;
+ case'raise':if(c&&c.st==='rtm2'&&T===c.bidder){const a=+m.amt;if(a>=c.bid+inc(c.bid)&&S.teams[T].purse>=a){c.raise=a;c.st='rtm3';c.endsAt=t+20000}}break;
+ case'accept':if(c&&c.st==='rtm2'&&T===c.bidder)sell(c.rtmT,c.bid,'RTM');break;
+ case'match':if(c&&c.st==='rtm3'&&T===c.rtmT&&canBuy(T,c.raise,c.pid))sell(T,c.raise,'RTM');break;
+ case'nomatch':if(c&&c.st==='rtm3'&&T===c.rtmT)sell(c.bidder,c.raise);break;
+ case'start':if(H&&S.phase==='lobby')startAuc();break;
+ case'set':{if(!H)break;const L=LIM[m.k];if(!L)break;if(m.k!=='timer'&&S.phase!=='lobby')break;S.set[m.k]=Math.min(L[1],Math.max(L[0],S.set[m.k]+m.d));
+  if(m.k==='timer'&&c&&c.st==='bid'){if(S.paused)c.left=S.set.timer*1000;else c.endsAt=t+S.set.timer*1000}break}
+ case'add':if(H&&c&&ACTIVE.includes(c.st)){if(S.paused)c.left+=m.v*1000;else c.endsAt+=m.v*1000}break;
+ case'pause':if(H&&S.phase==='auction'&&c){if(!S.paused){S.paused=true;if(ACTIVE.includes(c.st))c.left=Math.max(0,c.endsAt-t)}else{S.paused=false;if(ACTIVE.includes(c.st))c.endsAt=t+c.left;else c.next=t+1500}}break;
+ case'hammer':if(H&&c&&c.st==='bid'){S.paused=false;close()}break;
+ case'rtmskip':if(H&&c&&c.st.startsWith('rtm'))c.endsAt=t;break;
+ case'skip':if(H&&c){S.paused=false;if(ACTIVE.includes(c.st))unsold();else nxt()}break;
+ case'skippool':if(H&&S.phase==='auction'){S.paused=false;const p=S.pools[S.pi];if(c&&ACTIVE.includes(c.st)&&!S.reran)S.unsold.push(c.pid);if(p){if(!S.reran)S.unsold.push(...p.ids.slice(S.qi));S.qi=p.ids.length}nxt()}break;
+ }push()}
+function tick(){if(!isHost||!S||S.phase!=='auction'||S.paused||!S.cur)return;const c=S.cur,t=Date.now();let ch=true;
+ if(c.st==='intro'&&t>=c.endsAt){c.st='bid';c.endsAt=t+S.set.timer*1000}
+ else if(c.st==='bid'&&t>=c.endsAt)close();
+ else if(c.st==='rtm1'&&t>=c.endsAt)sell(c.bidder,c.bid);
+ else if(c.st==='rtm2'&&t>=c.endsAt)sell(c.rtmT,c.bid,'RTM');
+ else if(c.st==='rtm3'&&t>=c.endsAt)sell(c.bidder,c.raise);
+ else if((c.st==='sold'||c.st==='unsold')&&t>=c.next)nxt();
+ else ch=false;if(ch)push()}
+setInterval(tick,250);setInterval(()=>{if(isHost&&S)push()},2000);
+
+/* ---------- CLIENT ---------- */
+function joinRoom(c){code=c;isHost=false;inRoom=true;V=null;openCli();ui()}
+function openCli(){try{peer&&peer.destroy()}catch(e){}hc=null;peer=new Peer();peer.on('open',dial);peer.on('disconnected',()=>{try{peer.reconnect()}catch(e){}});peer.on('error',e=>{if(e.type==='peer-unavailable'&&!V)toast('Room not found yet – retrying…');dialing=0;setTimeout(dial,2000)})}
+function dial(){if(isHost||!peer||peer.destroyed||!peer.open)return;if(hc&&hc.open)return;if(Date.now()-dialing<5000)return;dialing=Date.now();
+ const c=peer.connect('iplauc-'+code,{reliable:true});c.on('open',()=>{hc=c;lastMsg=Date.now();c.send({t:'join',cid,name:myName})});
+ c.on('data',m=>{lastMsg=Date.now();onData(m)});c.on('close',()=>{if(hc===c)hc=null;dialing=0;setNet(false)});c.on('error',()=>{dialing=0})}
+function onData(m){if(m.t==='init'){PL=m.players;return}if(m.t==='s'){off=m.now-Date.now();V=m.s;setNet(true);ui()}}
+function setNet(ok){if(ok)downSince=0;else if(!downSince)downSince=Date.now()}
+function guard(){if(isHost||!inRoom)return;const ok=hc&&hc.open&&Date.now()-lastMsg<7000;if(ok){setNet(true);try{hc.send({t:'ping'})}catch(e){}return}
+ setNet(false);if(hc&&hc.open){try{hc.close()}catch(e){}}hc=null;dialing=0;if(!peer||peer.destroyed)openCli();else if(peer.disconnected){try{peer.reconnect()}catch(e){}}else dial()}
+setInterval(guard,2500);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){if(isHost){wake();tick()}else{lastMsg=lastMsg;guard()}}});
+window.addEventListener('online',()=>{if(!isHost)guard()});window.addEventListener('focus',()=>{if(!isHost)guard()});
+function send(m){if(isHost)act(cid,m);else if(hc&&hc.open)hc.send(m);else toast('Reconnecting… try again in a moment')}
+
+/* ---------- UI ---------- */
+const remain=()=>{const c=V&&V.cur;if(!c)return 0;if(V.paused)return Math.max(0,c.left||0);if(!ACTIVE.includes(c.st))return 0;return Math.max(0,c.endsAt-now())};
+let lastSec=-1;
+setInterval(()=>{const n=$('#net');if(n)n.innerHTML=(!isHost&&downSince&&Date.now()-downSince>2500)?'<span class="pill">Reconnecting…</span>':'';
+ const c=V&&V.cur;if(!c)return;const r=remain(),el=$('#tm');if(el){el.textContent=(r/1000).toFixed(1)+'s'}
+ const s=Math.ceil(r/1000);if(c.st==='bid'&&!V.paused&&s<=3&&s>0&&s!==lastSec)SND.tick();lastSec=s},200);
+function ui(){if(isHost&&S)V=view(cid);const root=$('#app');
+ if(!inRoom){root.innerHTML=landing();return}
+ if(!V){root.innerHTML=`<div class="w ctr"><div class="hero"><h2>Connecting to room ${esc(code)}…</h2><p class="mt">Keep this page open. It will retry automatically.</p></div><button class="b" onclick="leave()">Cancel</button></div>`;return}
+ snd();
+ let body='';if(V.phase==='lobby')body=lobby();else body=({a:auctionTab,s:squadTab,t:teamsTab,h:hostTab})[tab]();
+ const nav=V.phase==='lobby'?'':`<div class="nav"><button class="${tab==='a'?'on':''}" onclick="tab='a';ui()">Auction</button><button class="${tab==='s'?'on':''}" onclick="tab='s';ui()">My Squad</button><button class="${tab==='t'?'on':''}" onclick="tab='t';ui()">Teams</button>${isHost?`<button class="${tab==='h'?'on':''}" onclick="tab='h';ui()">Host</button>`:''}</div>`;
+ root.innerHTML=`<div class="top"><div><b>IPL Auction</b><span class="code" onclick="cp()">${V.code}</span></div><div class="row"><span id="net"></span><button class="ic" onclick="mute()">${muted?'🔇':'🔊'}</button></div></div><div class="w">${body}</div>${nav}`}
+function landing(){const hs=localStorage.hs?JSON.parse(localStorage.hs).code:'';
+ return `<div class="w"><div class="hero"><h1>IPL Auction</h1><p class="mt">Host a live auction. Share the room code and friends join from their own phones.</p></div>
+ <div class="card"><label>Your name</label><input id="nm" value="${esc(myName)}" maxlength="16" placeholder="e.g. Ravi"><button class="b p" onclick="mk(0)">Create room</button>${hs?`<button class="b" onclick="mk(1)">Resume last room (${hs})</button>`:''}</div>
+ <div class="card"><label>Room code</label><input id="rc" value="${hashCode}" maxlength="5" style="text-transform:uppercase;letter-spacing:4px" placeholder="ABCDE"><button class="b g" onclick="jn()">Join room</button></div></div>`}
+function nameOK(){const n=($('#nm')||{}).value;if(!n||!n.trim()){toast('Enter your name first');return false}myName=n.trim();localStorage.nm=myName;unlock();return true}
+function mk(r){if(nameOK())hostStart(!!r)}
+function jn(){if(!nameOK())return;const c=($('#rc').value||'').trim().toUpperCase();if(c.length<5){toast('Enter the 5-letter code');return}joinRoom(c)}
+function leave(){inRoom=false;V=null;try{peer.destroy()}catch(e){}ui()}
+function cp(){const l=location.origin+location.pathname+'#'+V.code;if(navigator.share)navigator.share({title:'IPL Auction',text:'Join my IPL auction – code '+V.code,url:l}).catch(()=>{});else if(navigator.clipboard){navigator.clipboard.writeText(l);toast('Invite link copied')}else prompt('Invite link',l)}
+function stp(l,k,v,d,f){return `<div class="stp"><span>${l}</span><div><button class="b s" onclick="send({t:'set',k:'${k}',d:${-d}})">−</button><b>${f(v)}</b><button class="b s" onclick="send({t:'set',k:'${k}',d:${d}})">+</button></div></div>`}
+function lobby(){const s=V.set;
+ return `<div class="card ctr"><div class="mt">Room code</div><div class="big" style="letter-spacing:6px;color:var(--ac)">${V.code}</div><button class="b" onclick="cp()">Share invite link</button></div>
+ <div class="card"><h2>Pick your franchise</h2><div class="grid">${Object.keys(TEAMS).map(T=>{const t=V.teams[T],mine=V.my===T;return `<button class="tc ${mine?'mine':''}" style="border-color:${t.taken?tcol(T):''}" ${t.taken&&!mine?'disabled':''} onclick="send({t:'${mine?'free':'claim'}',team:'${T}'})"><b style="color:${tcol(T)}">${T}</b><small>${t.taken?esc(t.oname)+(t.on?' ●':' (offline)'):'Open · tap to claim'}</small></button>`}).join('')}</div></div>
+ <div class="card"><h2>In the room (${V.mem.length})</h2>${V.mem.map(m=>`<div class="li"><span>${esc(m.n)}</span><span style="color:${tcol(m.t)}">${m.t||'spectating'}</span></div>`).join('')}</div>
+ ${isHost?`<div class="card"><h2>Rules</h2>${stp('Purse','purse',s.purse,500,v=>fmt(v))}${stp('Bid timer','timer',s.timer,5,v=>v+'s')}${stp('RTM cards','rtm',s.rtm,1,v=>v)}${stp('Max squad','maxSq',s.maxSq,1,v=>v)}${stp('Max overseas','maxOs',s.maxOs,1,v=>v)}<div class="mt" style="font-size:13px">${PL.length} players loaded</div><button class="b" onclick="openImp()">Import players</button></div>
+ <button class="b p" onclick="send({t:'start'})">Start auction</button>`:`<div class="card ctr mt">Waiting for the host to start…</div>`}`}
+function auctionTab(){return stage()+bidPanel()+(isHost?hostBar():'')+logCard()}
+function stage(){const c=V.cur;if(!c)return `<div class="card ctr"><div class="big">🏆</div><h2>Auction complete</h2><p class="mt">Check your squad in the next tab.</p></div>`;const P=PL[c.pid];if(!P)return '';
+ return `<div class="card"><div class="row sp"><span class="chip">${esc(V.pn)}</span><span class="chip">${V.left} to go</span></div><div class="pn">${esc(P.n)}</div>
+ <div class="row wrap mt"><span>${ROLE[P.r]}</span>·<span>${CTRY[P.c]||P.c}</span>${P.c!=='IN'?'<span class="chip os">Overseas</span>':''}</div>
+ <div class="prof"><div><i>Base price</i><b>${fmt(P.b)}</b></div><div><i>Rating</i><b>${P.rt}/100</b></div><div><i>Role</i><b>${ROLE[P.r]}</b></div><div><i>Last team · RTM</i><b style="color:${tcol(P.p)}">${P.p||'—'}</b></div></div></div>`}
+function bidInfo(){const c=V.cur;if(!c)return{};if(c.st==='intro')return{why:'Get ready…'};if(c.st!=='bid')return{};if(V.paused)return{why:'Paused by host'};const T=V.my;if(!T)return{why:'Claim a team in the Teams tab to bid'};if(c.bidder===T)return{why:'You hold the highest bid'};
+ const P=PL[c.pid],amt=c.bidder?c.bid+inc(c.bid):P.b,t=V.teams[T];if(t.purse<amt)return{why:'Not enough purse'};if(t.n>=V.set.maxSq)return{why:'Squad is full'};if(P.c!=='IN'&&t.os>=V.set.maxOs)return{why:'Overseas limit reached'};return{ok:true,amt}}
+function adjR(d){const c=V.cur,min=c.bid+inc(c.bid),max=V.teams[V.my].purse;raise=Math.min(max,Math.max(min,(raise||min)+d));ui()}
+function bidPanel(){const c=V.cur;if(!c)return '';const P=PL[c.pid];
+ if(c.st==='sold')return `<div class="card sold"><div class="big">SOLD</div><div style="font-size:18px;color:${tcol(c.to)}">${tn(c.to)}</div><div class="big" style="font-size:28px">${fmt(c.price)}</div>${c.via?'<div class="chip">via RTM</div>':''}</div>`;
+ if(c.st==='unsold')return `<div class="card uns"><div class="big">UNSOLD</div><div class="mt">${esc(P.n)} returns later if there's a re-run</div></div>`;
+ let mid='';const me=V.my;
+ if(c.st==='rtm1')mid=`<div class="card" style="border-color:var(--am)"><h2 style="color:var(--am)">Right to Match</h2><p>${tn(c.rtmT)} may match ${fmt(c.bid)} (${tn(c.bidder)}'s bid).</p>${me===c.rtmT?`<button class="b g" onclick="send({t:'rtmuse'})">Use RTM at ${fmt(c.bid)}</button><button class="b" onclick="send({t:'rtmpass'})">Let player go</button>`:''}</div>`;
+ else if(c.st==='rtm2'){const min=c.bid+inc(c.bid);if(!raise||raise<min)raise=min;mid=`<div class="card" style="border-color:var(--am)"><h2 style="color:var(--am)">${tn(c.rtmT)} used RTM</h2>${me===c.bidder?`<p>Raise to your own final amount, or accept.</p><div class="stp"><div><button class="b s" onclick="adjR(-25)">−25L</button><button class="b s" onclick="adjR(-5)">−5L</button></div><b style="font-size:22px">${fmt(raise)}</b><div><button class="b s" onclick="adjR(5)">+5L</button><button class="b s" onclick="adjR(25)">+25L</button><button class="b s" onclick="adjR(100)">+1Cr</button></div></div><button class="b p" onclick="send({t:'raise',amt:raise});raise=0">Raise to ${fmt(raise)}</button><button class="b" onclick="send({t:'accept'})">Don't raise</button>`:`<p class="mt">${tn(c.bidder)} can raise their bid…</p>`}</div>`}
+ else if(c.st==='rtm3')mid=`<div class="card" style="border-color:var(--am)"><h2 style="color:var(--am)">${tn(c.bidder)} raised to ${fmt(c.raise)}</h2>${me===c.rtmT?`<button class="b g" ${V.teams[me].purse<c.raise?'disabled':''} onclick="send({t:'match'})">Match ${fmt(c.raise)}</button><button class="b" onclick="send({t:'nomatch'})">Decline</button>`:`<p class="mt">${tn(c.rtmT)} to match or decline…</p>`}</div>`;
+ const bi=bidInfo(),r=remain();
+ return `<div class="card ctr"><div class="mt">${c.st==='intro'?'Starting':c.bidder?'Current bid':'No bids yet'}</div><div class="big">${c.bidder?fmt(c.bid):fmt(PL[c.pid].b)}</div>${c.bidder?`<div style="font-size:18px;color:${tcol(c.bidder)}">${tn(c.bidder)}</div>`:''}
+ <div class="tm" id="tm" style="margin-bottom:8px">${(r/1000).toFixed(1)}s</div>${V.paused?'<div class="pill">Paused</div>':''}
+ ${c.st==='bid'?`<button class="b p" style="font-size:18px;padding:16px" ${bi.ok?'':'disabled'} onclick="send({t:'bid'})">${bi.ok?'BID '+fmt(bi.amt):(bi.why||'Bid')}</button>`:''}</div>${mid}`}
+function hostBar(){const c=V.cur;if(!c||c.st==='sold'||c.st==='unsold')return `<div class="card"><div class="row"><button class="b" onclick="send({t:'pause'})">${V.paused?'▶ Resume':'⏸ Pause'}</button><button class="b" onclick="send({t:'skip'})">⏭ Next</button><button class="b" onclick="send({t:'skippool'})">⏩ Skip pool</button></div></div>`;
+ return `<div class="card"><div class="mt" style="font-size:12px;margin-bottom:6px">HOST CONTROLS</div><div class="row"><button class="b" onclick="send({t:'pause'})">${V.paused?'▶ Resume':'⏸ Pause'}</button><button class="b" onclick="send({t:'hammer'})">🔨 Drop hammer</button></div>
+ <div class="row"><button class="b" onclick="if(!V.cur.bidder||confirm('Skip and discard current bids?'))send({t:'skip'})">⏭ Skip player</button><button class="b" onclick="if(confirm('Skip the rest of this pool?'))send({t:'skippool'})">⏩ Skip pool</button></div>
+ <div class="stp"><span>Bid timer</span><div><button class="b s" onclick="send({t:'set',k:'timer',d:-5})">−5</button><b>${V.set.timer}s</b><button class="b s" onclick="send({t:'set',k:'timer',d:5})">+5</button></div></div>
+ <div class="row"><button class="b" onclick="send({t:'add',v:10})">+10s this lot</button>${c.st.startsWith('rtm')?`<button class="b" onclick="send({t:'rtmskip'})">Skip RTM step</button>`:''}</div></div>`}
+function logCard(){if(!V.log.length)return '';return `<div class="card"><h2>Recent sales</h2>${V.log.slice(0,8).map(l=>`<div class="li"><span>${esc(PL[l.id].n)}</span><span style="color:${tcol(l.to)}">${l.to} · ${fmt(l.pr)}${l.via?' · RTM':''}</span></div>`).join('')}</div>`}
+function sqHtml(T){const t=V.teams[T];if(!t||!t.sq)return '<p class="mt">Squads of other teams are hidden.</p>';
+ const rows=[...t.sq].sort((a,b)=>b.pr-a.pr).map(x=>{const p=PL[x.id];return `<div class="li"><span>${esc(p.n)}<br><small class="mt">${ROLE[p.r]} · ${CTRY[p.c]||p.c}</small></span><b>${fmt(x.pr)}</b></div>`}).join('');
+ return `<div class="row wrap" style="margin-bottom:6px"><span class="chip">Purse ${fmt(t.purse)}</span><span class="chip">${t.n}/${V.set.maxSq} players</span><span class="chip">${t.os}/${V.set.maxOs} overseas</span><span class="chip">${t.rtm} RTM</span></div>${rows||'<p class="mt">No players yet.</p>'}`}
+function squadTab(){if(!V.my)return `<div class="card ctr mt">You haven't claimed a team. Go to Teams to claim an open franchise.</div>`;return `<div class="card"><h2 style="color:${tcol(V.my)}">${tn(V.my)}</h2>${sqHtml(V.my)}</div>`}
+function teamsTab(){return `<div class="card"><h2>Franchises</h2>${Object.keys(TEAMS).map(T=>{const t=V.teams[T],mine=V.my===T;return `<div class="li"><span><b style="color:${tcol(T)}">${T}</b> <small class="mt">${t.taken?esc(t.oname)+(t.on?'':' (offline)'):'open'}</small></span><span class="row"><small class="mt">${fmt(t.purse)} · ${t.n}p · ${t.rtm} RTM</small>${!t.taken&&!V.my?`<button class="b s" onclick="send({t:'claim',team:'${T}'})">Claim</button>`:mine?'<span class="chip">You</span>':''}</span></div>`}).join('')}</div>`}
+function hostTab(){const vtm=vt||Object.keys(TEAMS)[0];const p=V.pools||[];
+ const up=[];if(p[V.pi])up.push(...p[V.pi].ids.slice(V.qi));
+ return `<div class="card"><h2>Up next</h2>${up.slice(0,12).map(i=>`<div class="li"><span>${esc(PL[i].n)}</span><span class="mt">${ROLE[PL[i].r]} · ${PL[i].rt}</span></div>`).join('')||'<p class="mt">Pool finished.</p>'}</div>
+ <div class="card"><h2>Pools</h2>${p.map((x,i)=>`<div class="li"><span>${i===V.pi?'▶ ':''}${esc(x.name)}</span><span class="mt">${i<V.pi?0:i===V.pi?x.ids.length-V.qi:x.ids.length} left</span></div>`).join('')}<div class="li"><span>Unsold (re-run at end)</span><span class="mt">${(V.unsold||[]).length}</span></div></div>
+ <div class="card"><h2>All squads</h2><select onchange="vt=this.value;ui()">${Object.keys(TEAMS).map(T=>`<option value="${T}" ${T===vtm?'selected':''}>${TEAMS[T][0]}${V.teams[T].taken?' – '+esc(V.teams[T].oname):''}</option>`).join('')}</select>${sqHtml(vtm)}</div>
+ <button class="b" onclick="expCsv()">Download results (CSV)</button>`}
+function expCsv(){let r='Team,Owner,Player,Country,Role,Price(Lakh)\n';for(const T in V.teams){const t=V.teams[T];(t.sq||[]).forEach(x=>{const p=PL[x.id];r+=[T,t.oname,p.n,p.c,p.r,x.pr].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')+'\n'})}
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([r],{type:'text/csv'}));a.download='ipl-auction-results.csv';a.click()}
+function openImp(){$('#ta').value=localStorage.csv||RAW;$('#imp').showModal()}
+function doImp(){const p=parse($('#ta').value);if(p.length<10){toast('Need at least 10 valid lines');return}if(S.phase!=='lobby'){toast('Only before the auction starts');return}PL=p;localStorage.csv=$('#ta').value;$('#imp').close();bcastInit();toast(p.length+' players loaded');push()}
+function resetImp(){localStorage.removeItem('csv');if(S&&S.phase==='lobby'){PL=parse(RAW);bcastInit();push()}$('#imp').close()}
+ui();
+</script></body></html>
